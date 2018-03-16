@@ -1,0 +1,122 @@
+apply plugin: 'com.android.application'
+// apply plugin: 'io.fabric'
+apply plugin: 'me.tatarka.retrolambda'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion '26.0.1'
+
+  lintOptions {
+    checkReleaseBuilds true
+    lintConfig file("lint.xml")
+  }
+
+  defaultConfig {
+    minSdkVersion 14
+    targetSdkVersion 25
+    versionCode 2
+    versionName "2"
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+
+  signingConfigs{
+    release{
+      keyAlias 'DS'
+      keyPassword 'Designetics1'
+      storeFile file('keystore/quranexplorekey.jks')
+      storePassword 'Designetics1'
+    }
+  }
+
+  productFlavors {
+    madani {
+      applicationId "com.designetixcs.quranexplore"
+    }
+
+
+  }
+
+  buildTypes {
+    beta {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
+      signingConfig signingConfigs.release
+      versionNameSuffix "-beta"
+      if (project.hasProperty('disableCrashlytics')) {
+        ext.enableCrashlytics = false
+      }
+    }
+
+    debug {
+      ext.enableCrashlytics = false
+      applicationIdSuffix ".debug"
+      versionNameSuffix "-debug"
+    }
+
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
+      signingConfig signingConfigs.release
+      if (project.hasProperty('disableCrashlytics')) {
+        ext.enableCrashlytics = false
+      }
+    }
+  }
+
+  applicationVariants.all { variant ->
+    resValue "string", "authority", applicationId + '.data.QuranDataProvider'
+    resValue "string", "file_authority", applicationId + '.fileprovider'
+    if (applicationId.endsWith("debug")) {
+      mergedFlavor.manifestPlaceholders = [app_debug_label: "Quran " + flavorName.capitalize()]
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  testOptions.unitTests.all {
+    testLogging {
+      events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+      outputs.upToDateWhen { false }
+      showStandardStreams true
+      exceptionFormat "full"
+    }
+  }
+}
+
+ext {
+  supportLibVersion = '25.1.0'
+  espressoVersion = '2.2.2'
+}
+
+dependencies {
+  compile "com.android.support:support-v4:${supportLibVersion}"
+  compile "com.android.support:appcompat-v7:${supportLibVersion}"
+  compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+  compile "com.android.support:design:${supportLibVersion}"
+  compile 'io.reactivex.rxjava2:rxjava:2.0.4'
+  compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+  annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
+  compile 'com.google.dagger:dagger:2.8'
+  compile 'com.squareup.okhttp3:okhttp:3.5.0'
+  compile 'com.squareup.moshi:moshi:1.3.1'
+  compile 'com.jakewharton.timber:timber:4.5.0'
+  compile 'com.jakewharton:butterknife:8.4.0'
+  annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+  debugCompile 'com.facebook.stetho:stetho:1.4.1'
+  debugCompile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
+  debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+  testCompile 'junit:junit:4.12'
+  testCompile 'com.google.truth:truth:0.30'
+  testCompile "org.mockito:mockito-core:1.10.19"
+  testCompile 'com.squareup.okhttp3:mockwebserver:3.5.0'
+  androidTestCompile "com.android.support.test.espresso:espresso-core:${espressoVersion}"
+  androidTestCompile "com.android.support.test.espresso:espresso-intents:${espressoVersion}"
+  androidTestCompile "com.android.support:support-annotations:${supportLibVersion}"
+  compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
+    transitive = true
+  }
+  compile 'com.google.android.gms:play-services-ads:10.2.0'
+}
